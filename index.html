@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Перенаправление</title>
+    <script>
+        // URL для перенаправления (можно изменить)
+        let redirectUrl = "https://youtube.com";
+        
+        // Перенаправление
+        window.location.href = redirectUrl;
+        
+        // Функция для изменения URL (можно вызвать из консоли браузера)
+        function changeRedirectUrl(newUrl) {
+            redirectUrl = newUrl;
+            localStorage.setItem('redirectUrl', newUrl);
+        }
+        
+        // Проверяем сохраненный URL при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedUrl = localStorage.getItem('redirectUrl');
+            if (savedUrl) {
+                redirectUrl = savedUrl;
+            }
+        });
+    </script>
+</head>
+<body>
+    <p>Если перенаправление не сработало, <a id="redirectLink" href="#">нажмите здесь</a>.</p>
+    
+    <script>
+        document.getElementById('redirectLink').href = redirectUrl;
+    </script>
+</body>
+</html>
