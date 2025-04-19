@@ -1,29 +1,168 @@
- <!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-    <title>Перенаправление</title>
-    <script>
-        const defaultUrl = "https://apps.apple.com/ru/app/instagram/id389801252";
-        const newUrl = "https://apps.apple.com/ru/app/instagram/id389801252";
-        
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор QR-кодов</title>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
         }
-        
-        if (getCookie('visited')) {
-            window.location.href = defaultUrl;
-        } else {
-            document.cookie = "visited=true; max-age=31536000"; // Кука на 1 год
-            window.location.href = newUrl;
+        h1 {
+            color: #333;
         }
-    </script>
+        .input-group {
+            margin: 20px 0;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #qrcode {
+            margin: 30px auto;
+            display: flex;
+            justify-content: center;
+        }
+        .download-btn {
+            background-color: #2196F3;
+        }
+        .download-btn:hover {
+            background-color: #0b7dda;
+        }
+        .update-btn {
+            background-color: #ff9800;
+        }
+        .update-btn:hover {
+            background-color: #e68a00;
+        }
+    </style>
 </head>
 <body>
-    <p>Если перенаправление не сработало, <a id="redirectLink" href="#">нажмите здесь</a>.</p>
+    <h1>Редактор QR-кодов</h1>
+    <p>Создайте и обновляйте QR-код без перегенерации</p>
+    
+    <div class="input-group">
+        <input type="text" id="urlInput" placeholder="Введите URL (например, https://example.com)" value="https://">
+        <button id="generateBtn">Создать QR-код</button>
+        <button class="update-btn" id="updateBtn">Обновить ссылку</button>
+    </div>
+    
+    <div id="qrcode"></div>
+    
+    <div>
+        <button class="download-btn" id="downloadBtn">Скачать QR-код</button>
+    </div>
+    
     <script>
-        document.getElementById('redirectLink').href = getCookie('visited') ? defaultUrl : newUrl;
+        const qrcodeDiv = document.getElementById("qrcode");
+        let qrcode;
+        
+        const urlInput = document.getElementById("urlInput");
+        const generateBtn = document.getElementById("generateBtn");
+        const updateBtn = document.getElementById("updateBtn");
+        const downloadBtn = document.getElementById("downloadBtn");
+        
+        // Инициализация QR-кода
+        function initQRCode() {
+            // Очищаем предыдущий QR-код
+            qrcodeDiv.innerHTML = '';
+            
+            // Создаем новый экземпляр QRCode
+            qrcode = new QRCode(qrcodeDiv, {
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+        
+        // Генерация QR-кода
+        generateBtn.addEventListener("click", function() {
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert("Пожалуйста, введите URL");
+                return;
+            }
+            
+            // Добавляем https:// если его нет
+            let finalUrl = url;
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                finalUrl = "https://" + url;
+                urlInput.value = finalUrl;
+            }
+            
+            initQRCode();
+            qrcode.makeCode(finalUrl);
+        });
+        
+        // Обновление ссылки в QR-коде
+        updateBtn.addEventListener("click", function() {
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert("Пожалуйста, введите URL");
+                return;
+            }
+            
+            if (!qrcode) {
+                alert("Сначала создайте QR-код");
+                return;
+            }
+            
+            // Добавляем https:// если его нет
+            let finalUrl = url;
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                finalUrl = "https://" + url;
+                urlInput.value = finalUrl;
+            }
+            
+            // Обновляем QR-код без пересоздания
+            qrcode.makeCode(finalUrl);
+        });
+        
+        // Скачивание QR-кода
+        downloadBtn.addEventListener("click", function() {
+            const canvas = document.querySelector("#qrcode canvas");
+            if (!canvas) {
+                alert("Сначала создайте QR-код");
+                return;
+            }
+            
+            const link = document.createElement("a");
+            link.download = "qr-code.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+        
+        // Генерация при нажатии Enter
+        urlInput.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                generateBtn.click();
+            }
+        });
     </script>
 </body>
 </html>
